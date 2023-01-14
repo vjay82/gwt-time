@@ -115,8 +115,7 @@ public final class LocalDateTime extends DefaultInterfaceChronoLocalDateTime<ISO
 	 * @return the current date-time using the system clock and default time-zone, not null
 	 */
 	public static LocalDateTime now() {
-
-		return now(Clock.systemDefaultZone());
+		return ZonedDateTime.now().toLocalDateTime();
 	}
 
 	/**

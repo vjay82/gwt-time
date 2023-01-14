@@ -52,6 +52,7 @@ import java.time.format.DateTimeParseException;
 import java.time.jdk8.DefaultInterfaceDateTimeAccessor;
 import java.time.jdk8.Jdk7Methods;
 import java.time.jdk8.Jdk8Methods;
+import java.util.Date;
 
 /**
  * An instantaneous point on the time-line.
@@ -181,8 +182,8 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 	 * @return the current instant using the system clock, not null
 	 */
 	public static Instant now() {
-
-		return Clock.systemUTC().instant();
+		Date date = new Date();
+		return Instant.ofEpochMilli(date.getTime()).minusSeconds(date.getTimezoneOffset() * 60);
 	}
 
 	/**

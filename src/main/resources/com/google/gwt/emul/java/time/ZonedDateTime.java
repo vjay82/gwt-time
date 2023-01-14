@@ -121,8 +121,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	 * @return the current date-time using the system clock, not null
 	 */
 	public static ZonedDateTime now() {
-
-		return now(Clock.systemDefaultZone());
+		return Instant.now().atZone(ZoneId.systemDefault());
 	}
 
 	/**
@@ -1759,6 +1758,14 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 
 	public LocalDateTime toLocalDateTime() {
 		return dateTime;
+	}
+
+	public LocalTime toLocalTime() {
+		return dateTime.toLocalTime();
+	}
+
+	public LocalDate toLocalDate() {
+		return dateTime.toLocalDate();
 	}
 
 }

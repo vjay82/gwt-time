@@ -149,8 +149,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 	 * @return the current date using the system clock and default time-zone, not null
 	 */
 	public static LocalDate now() {
-
-		return now(Clock.systemDefaultZone());
+		return ZonedDateTime.now().toLocalDate();
 	}
 
 	/**
