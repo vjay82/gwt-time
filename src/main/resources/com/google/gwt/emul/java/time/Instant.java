@@ -34,24 +34,24 @@ package java.time;
 import static java.time.LocalTime.SECONDS_PER_DAY;
 import static java.time.LocalTime.SECONDS_PER_HOUR;
 import static java.time.LocalTime.SECONDS_PER_MINUTE;
-import static java.time.calendrical.ChronoField.INSTANT_SECONDS;
-import static java.time.calendrical.ChronoField.MICRO_OF_SECOND;
-import static java.time.calendrical.ChronoField.MILLI_OF_SECOND;
-import static java.time.calendrical.ChronoField.NANO_OF_SECOND;
-import static java.time.calendrical.ChronoUnit.NANOS;
+import static java.time.temporal.ChronoField.INSTANT_SECONDS;
+import static java.time.temporal.ChronoField.MICRO_OF_SECOND;
+import static java.time.temporal.ChronoField.MILLI_OF_SECOND;
+import static java.time.temporal.ChronoField.NANO_OF_SECOND;
+import static java.time.temporal.ChronoUnit.NANOS;
 
 import java.io.Serializable;
-import java.time.calendrical.ChronoField;
-import java.time.calendrical.ChronoUnit;
-import java.time.calendrical.DateTime;
-import java.time.calendrical.DateTime.WithAdjuster;
-import java.time.calendrical.DateTimeAccessor;
-import java.time.calendrical.DateTimeField;
-import java.time.calendrical.PeriodUnit;
 import java.time.format.DateTimeParseException;
 import java.time.jdk8.DefaultInterfaceDateTimeAccessor;
 import java.time.jdk8.Jdk7Methods;
 import java.time.jdk8.Jdk8Methods;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.DateTime;
+import java.time.temporal.DateTime.WithAdjuster;
+import java.time.temporal.DateTimeAccessor;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
 
 /**
@@ -182,8 +182,7 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 	 * @return the current instant using the system clock, not null
 	 */
 	public static Instant now() {
-		Date date = new Date();
-		return Instant.ofEpochMilli(date.getTime()).minusSeconds(date.getTimezoneOffset() * 60);
+		return Instant.ofEpochMilli(new Date().getTime());
 	}
 
 	/**
@@ -346,7 +345,7 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 
 	// -----------------------------------------------------------------------
 	@Override
-	public boolean isSupported(DateTimeField field) {
+	public boolean isSupported(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			return field == INSTANT_SECONDS || field == NANO_OF_SECOND || field == MICRO_OF_SECOND || field == MILLI_OF_SECOND;
@@ -355,7 +354,7 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 	}
 
 	@Override
-	public long getLong(DateTimeField field) {
+	public long getLong(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			switch ((ChronoField) field) {
@@ -408,7 +407,7 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 	}
 
 	@Override
-	public Instant with(DateTimeField field, long newValue) {
+	public Instant with(TemporalField field, long newValue) {
 
 		if (field instanceof ChronoField) {
 			ChronoField f = (ChronoField) field;
@@ -440,7 +439,7 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 	}
 
 	@Override
-	public Instant plus(long amountToAdd, PeriodUnit unit) {
+	public Instant plus(long amountToAdd, TemporalUnit unit) {
 
 		if (unit instanceof ChronoUnit) {
 			switch ((ChronoUnit) unit) {
@@ -548,7 +547,7 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 	}
 
 	@Override
-	public Instant minus(long amountToSubtract, PeriodUnit unit) {
+	public Instant minus(long amountToSubtract, TemporalUnit unit) {
 
 		return (amountToSubtract == Long.MIN_VALUE ? plus(Long.MAX_VALUE, unit).plus(1, unit) : plus(-amountToSubtract, unit));
 	}
@@ -619,7 +618,7 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 	}
 
 	@Override
-	public long periodUntil(DateTime endDateTime, PeriodUnit unit) {
+	public long until(DateTime endDateTime, TemporalUnit unit) {
 
 		if (endDateTime instanceof Instant == false) {
 			throw new DateTimeException("Unable to calculate period between objects of two different types");
@@ -647,7 +646,7 @@ public final class Instant extends DefaultInterfaceDateTimeAccessor implements D
 			}
 			throw new DateTimeException("Unsupported unit: " + unit.getName());
 		}
-		return unit.between(this, endDateTime).getAmount();
+		return unit.between(this, endDateTime);
 	}
 
 	private long nanosUntil(Instant end) {

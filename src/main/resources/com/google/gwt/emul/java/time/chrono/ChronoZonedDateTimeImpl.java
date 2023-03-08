@@ -31,7 +31,7 @@
  */
 package java.time.chrono;
 
-import static java.time.calendrical.ChronoUnit.SECONDS;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 import java.io.Serializable;
 import java.time.DateTimeException;
@@ -39,13 +39,13 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.calendrical.ChronoField;
-import java.time.calendrical.ChronoUnit;
-import java.time.calendrical.DateTime;
-import java.time.calendrical.DateTimeField;
-import java.time.calendrical.PeriodUnit;
 import java.time.jdk8.DefaultInterfaceChronoZonedDateTime;
 import java.time.jdk8.Jdk7Methods;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.DateTime;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
 import java.time.zone.ZoneRules;
 import java.util.List;
 
@@ -63,213 +63,211 @@ import java.util.List;
  * 
  * @param <C> the chronology of this date
  */
-final class ChronoZonedDateTimeImpl<C extends Chrono<C>> extends DefaultInterfaceChronoZonedDateTime<C> implements
-    ChronoZonedDateTime<C>, Serializable {
+final class ChronoZonedDateTimeImpl<C extends Chrono<C>> extends DefaultInterfaceChronoZonedDateTime<C> implements ChronoZonedDateTime<C>, Serializable {
 
-  /**
-   * Serialization version.
-   */
-  private static final long serialVersionUID = -5261813987200935591L;
+	/**
+	 * Serialization version.
+	 */
+	private static final long serialVersionUID = -5261813987200935591L;
 
-  /**
-   * The local date-time.
-   */
-  private final ChronoDateTimeImpl<C> dateTime;
+	/**
+	 * The local date-time.
+	 */
+	private final ChronoDateTimeImpl<C> dateTime;
 
-  /**
-   * The zone offset.
-   */
-  private final ZoneOffset offset;
+	/**
+	 * The zone offset.
+	 */
+	private final ZoneOffset offset;
 
-  /**
-   * The zone ID.
-   */
-  private final ZoneId zoneId;
+	/**
+	 * The zone ID.
+	 */
+	private final ZoneId zoneId;
 
-  // -----------------------------------------------------------------------
-  /**
-   * Obtains an instance of {@code ZonedDateTime} from a local date-time using the preferred offset if
-   * possible.
-   * 
-   * @param localDateTime the local date-time, not null
-   * @param zoneId the zone identifier, not null
-   * @param preferredOffset the zone offset, null if no preference
-   * @return the zoned date-time, not null
-   */
-  static <R extends Chrono<R>> ChronoZonedDateTime<R> ofBest(ChronoDateTimeImpl<R> localDateTime, ZoneId zoneId,
-      ZoneOffset preferredOffset) {
+	// -----------------------------------------------------------------------
+	/**
+	 * Obtains an instance of {@code ZonedDateTime} from a local date-time using the preferred offset if
+	 * possible.
+	 * 
+	 * @param localDateTime the local date-time, not null
+	 * @param zoneId the zone identifier, not null
+	 * @param preferredOffset the zone offset, null if no preference
+	 * @return the zoned date-time, not null
+	 */
+	static <R extends Chrono<R>> ChronoZonedDateTime<R> ofBest(ChronoDateTimeImpl<R> localDateTime, ZoneId zoneId, ZoneOffset preferredOffset) {
 
-    Jdk7Methods.Objects_requireNonNull(localDateTime, "localDateTime");
-    Jdk7Methods.Objects_requireNonNull(zoneId, "zoneId");
-    if (zoneId instanceof ZoneOffset) {
-      return new ChronoZonedDateTimeImpl<R>(localDateTime, (ZoneOffset) zoneId, zoneId);
-    }
-    ZoneRules rules = zoneId.getRules();
-    LocalDateTime isoLDT = LocalDateTime.from(localDateTime);
-    List<ZoneOffset> validOffsets = rules.getValidOffsets(isoLDT);
-    ZoneOffset offset;
-    if (validOffsets.size() == 1) {
-      offset = validOffsets.get(0);
-    } else if (validOffsets.size() == 0) {
-      // TODO what to do with chrono support in GWT?
-      // ZoneOffsetTransition trans = rules.getTransition(isoLDT);
-      // localDateTime = localDateTime.plusSeconds(trans.getDuration().getSeconds());
-      // offset = trans.getOffsetAfter();
-      offset = rules.getOffset(isoLDT);
-    } else {
-      if (preferredOffset != null && validOffsets.contains(preferredOffset)) {
-        offset = preferredOffset;
-      } else {
-        offset = validOffsets.get(0);
-      }
-    }
-    Jdk7Methods.Objects_requireNonNull(offset, "offset"); // protect against bad ZoneRules
-    return new ChronoZonedDateTimeImpl<R>(localDateTime, offset, zoneId);
-  }
+		Jdk7Methods.Objects_requireNonNull(localDateTime, "localDateTime");
+		Jdk7Methods.Objects_requireNonNull(zoneId, "zoneId");
+		if (zoneId instanceof ZoneOffset) {
+			return new ChronoZonedDateTimeImpl<R>(localDateTime, (ZoneOffset) zoneId, zoneId);
+		}
+		ZoneRules rules = zoneId.getRules();
+		LocalDateTime isoLDT = LocalDateTime.from(localDateTime);
+		List<ZoneOffset> validOffsets = rules.getValidOffsets(isoLDT);
+		ZoneOffset offset;
+		if (validOffsets.size() == 1) {
+			offset = validOffsets.get(0);
+		} else if (validOffsets.size() == 0) {
+			// TODO what to do with chrono support in GWT?
+			// ZoneOffsetTransition trans = rules.getTransition(isoLDT);
+			// localDateTime = localDateTime.plusSeconds(trans.getDuration().getSeconds());
+			// offset = trans.getOffsetAfter();
+			offset = rules.getOffset(isoLDT);
+		} else {
+			if (preferredOffset != null && validOffsets.contains(preferredOffset)) {
+				offset = preferredOffset;
+			} else {
+				offset = validOffsets.get(0);
+			}
+		}
+		Jdk7Methods.Objects_requireNonNull(offset, "offset"); // protect against bad ZoneRules
+		return new ChronoZonedDateTimeImpl<R>(localDateTime, offset, zoneId);
+	}
 
-  /**
-   * Obtains an instance of {@code ZoneChronoDateTime} from an {@code Instant}.
-   * 
-   * @param instant the instant to create the date-time from, not null
-   * @param zoneId the time-zone to use, validated not null
-   * @return the zoned date-time, validated not null
-   */
-  private ChronoZonedDateTimeImpl<C> create(Instant instant, ZoneId zoneId) {
+	/**
+	 * Obtains an instance of {@code ZoneChronoDateTime} from an {@code Instant}.
+	 * 
+	 * @param instant the instant to create the date-time from, not null
+	 * @param zoneId the time-zone to use, validated not null
+	 * @return the zoned date-time, validated not null
+	 */
+	private ChronoZonedDateTimeImpl<C> create(Instant instant, ZoneId zoneId) {
 
-    ChronoDateTimeImpl<C> cldt = getDate().getChrono().localInstant(instant, zoneId);
-    return new ChronoZonedDateTimeImpl<C>(cldt, this.offset, zoneId);
-  }
+		ChronoDateTimeImpl<C> cldt = getDate().getChrono().localInstant(instant, zoneId);
+		return new ChronoZonedDateTimeImpl<C>(cldt, this.offset, zoneId);
+	}
 
-  // -----------------------------------------------------------------------
-  /**
-   * Constructor.
-   * 
-   * @param dateTime the date-time, not null
-   * @param offset the zone offset, not null
-   * @param zone the zone ID, not null
-   */
-  private ChronoZonedDateTimeImpl(ChronoDateTimeImpl<C> dateTime, ZoneOffset offset, ZoneId zoneId) {
+	// -----------------------------------------------------------------------
+	/**
+	 * Constructor.
+	 * 
+	 * @param dateTime the date-time, not null
+	 * @param offset the zone offset, not null
+	 * @param zone the zone ID, not null
+	 */
+	private ChronoZonedDateTimeImpl(ChronoDateTimeImpl<C> dateTime, ZoneOffset offset, ZoneId zoneId) {
 
-    this.dateTime = Jdk7Methods.Objects_requireNonNull(dateTime, "dateTime");
-    this.offset = Jdk7Methods.Objects_requireNonNull(offset, "offset");
-    this.zoneId = Jdk7Methods.Objects_requireNonNull(zoneId, "zoneId");
-  }
+		this.dateTime = Jdk7Methods.Objects_requireNonNull(dateTime, "dateTime");
+		this.offset = Jdk7Methods.Objects_requireNonNull(offset, "offset");
+		this.zoneId = Jdk7Methods.Objects_requireNonNull(zoneId, "zoneId");
+	}
 
-  // -----------------------------------------------------------------------
-  @Override
-  public ZoneOffset getOffset() {
+	// -----------------------------------------------------------------------
+	@Override
+	public ZoneOffset getOffset() {
 
-    return this.offset;
-  }
+		return this.offset;
+	}
 
-  // @Override
-  // public ChronoZonedDateTime<C> withEarlierOffsetAtOverlap() {
-  //
-  // ZoneOffsetTransition trans = getZone().getRules().getTransition(LocalDateTime.from(this));
-  // if (trans != null && trans.isOverlap()) {
-  // ZoneOffset earlierOffset = trans.getOffsetBefore();
-  // if (earlierOffset.equals(this.offset) == false) {
-  // return new ChronoZonedDateTimeImpl<C>(this.dateTime, earlierOffset, this.zoneId);
-  // }
-  // }
-  // return this;
-  // }
-  //
-  // @Override
-  // public ChronoZonedDateTime<C> withLaterOffsetAtOverlap() {
-  //
-  // ZoneOffsetTransition trans = getZone().getRules().getTransition(LocalDateTime.from(this));
-  // if (trans != null) {
-  // ZoneOffset offset = trans.getOffsetAfter();
-  // if (offset.equals(getOffset()) == false) {
-  // return new ChronoZonedDateTimeImpl<C>(this.dateTime, offset, this.zoneId);
-  // }
-  // }
-  // return this;
-  // }
+	// @Override
+	// public ChronoZonedDateTime<C> withEarlierOffsetAtOverlap() {
+	//
+	// ZoneOffsetTransition trans = getZone().getRules().getTransition(LocalDateTime.from(this));
+	// if (trans != null && trans.isOverlap()) {
+	// ZoneOffset earlierOffset = trans.getOffsetBefore();
+	// if (earlierOffset.equals(this.offset) == false) {
+	// return new ChronoZonedDateTimeImpl<C>(this.dateTime, earlierOffset, this.zoneId);
+	// }
+	// }
+	// return this;
+	// }
+	//
+	// @Override
+	// public ChronoZonedDateTime<C> withLaterOffsetAtOverlap() {
+	//
+	// ZoneOffsetTransition trans = getZone().getRules().getTransition(LocalDateTime.from(this));
+	// if (trans != null) {
+	// ZoneOffset offset = trans.getOffsetAfter();
+	// if (offset.equals(getOffset()) == false) {
+	// return new ChronoZonedDateTimeImpl<C>(this.dateTime, offset, this.zoneId);
+	// }
+	// }
+	// return this;
+	// }
 
-  // -----------------------------------------------------------------------
-  @Override
-  public ChronoLocalDateTime<C> getDateTime() {
+	// -----------------------------------------------------------------------
+	@Override
+	public ChronoLocalDateTime<C> getDateTime() {
 
-    return this.dateTime;
-  }
+		return this.dateTime;
+	}
 
-  @Override
-  public ZoneId getZone() {
+	@Override
+	public ZoneId getZone() {
 
-    return this.zoneId;
-  }
+		return this.zoneId;
+	}
 
-  @Override
-  public ChronoZonedDateTime<C> withZoneSameLocal(ZoneId zoneId) {
+	@Override
+	public ChronoZonedDateTime<C> withZoneSameLocal(ZoneId zoneId) {
 
-    return ofBest(this.dateTime, zoneId, this.offset);
-  }
+		return ofBest(this.dateTime, zoneId, this.offset);
+	}
 
-  @Override
-  public ChronoZonedDateTime<C> withZoneSameInstant(ZoneId zoneId) {
+	@Override
+	public ChronoZonedDateTime<C> withZoneSameInstant(ZoneId zoneId) {
 
-    Jdk7Methods.Objects_requireNonNull(zoneId, "zoneId");
-    return this.zoneId.equals(zoneId) ? this : create(this.dateTime.toInstant(this.offset), zoneId);
-  }
+		Jdk7Methods.Objects_requireNonNull(zoneId, "zoneId");
+		return this.zoneId.equals(zoneId) ? this : create(this.dateTime.toInstant(this.offset), zoneId);
+	}
 
-  // -----------------------------------------------------------------------
-  @Override
-  public boolean isSupported(DateTimeField field) {
+	// -----------------------------------------------------------------------
+	@Override
+	public boolean isSupported(TemporalField field) {
 
-    return field instanceof ChronoField || (field != null && field.doIsSupported(this));
-  }
+		return field instanceof ChronoField || (field != null && field.doIsSupported(this));
+	}
 
-  // -----------------------------------------------------------------------
-  @Override
-  public ChronoZonedDateTime<C> with(DateTimeField field, long newValue) {
+	// -----------------------------------------------------------------------
+	@Override
+	public ChronoZonedDateTime<C> with(TemporalField field, long newValue) {
 
-    if (field instanceof ChronoField) {
-      ChronoField f = (ChronoField) field;
-      switch (f) {
-        case INSTANT_SECONDS:
-          return plus(newValue - toEpochSecond(), SECONDS);
-        case OFFSET_SECONDS: {
-          ZoneOffset offset = ZoneOffset.ofTotalSeconds(f.checkValidIntValue(newValue));
-          return create(this.dateTime.toInstant(offset), this.zoneId);
-        }
-      }
-      return ofBest(this.dateTime.with(field, newValue), this.zoneId, this.offset);
-    }
-    return getDate().getChrono().ensureChronoZonedDateTime(field.doWith(this, newValue));
-  }
+		if (field instanceof ChronoField) {
+			ChronoField f = (ChronoField) field;
+			switch (f) {
+				case INSTANT_SECONDS :
+					return plus(newValue - toEpochSecond(), SECONDS);
+				case OFFSET_SECONDS : {
+					ZoneOffset offset = ZoneOffset.ofTotalSeconds(f.checkValidIntValue(newValue));
+					return create(this.dateTime.toInstant(offset), this.zoneId);
+				}
+			}
+			return ofBest(this.dateTime.with(field, newValue), this.zoneId, this.offset);
+		}
+		return getDate().getChrono().ensureChronoZonedDateTime(field.doWith(this, newValue));
+	}
 
-  // -----------------------------------------------------------------------
-  @Override
-  public ChronoZonedDateTime<C> plus(long amountToAdd, PeriodUnit unit) {
+	// -----------------------------------------------------------------------
+	@Override
+	public ChronoZonedDateTime<C> plus(long amountToAdd, TemporalUnit unit) {
 
-    if (unit instanceof ChronoUnit) {
-      return with(this.dateTime.plus(amountToAdd, unit));
-    }
-    return getDate().getChrono().ensureChronoZonedDateTime(unit.doPlus(this, amountToAdd)); // / TODO:
-                                                                                            // Generics
-                                                                                            // replacement
-                                                                                            // Risk!
-  }
+		if (unit instanceof ChronoUnit) {
+			return with(this.dateTime.plus(amountToAdd, unit));
+		}
+		return getDate().getChrono().ensureChronoZonedDateTime(unit.doPlus(this, amountToAdd)); // / TODO:
+																								// Generics
+																								// replacement
+																								// Risk!
+	}
 
-  // -----------------------------------------------------------------------
-  @Override
-  public long periodUntil(DateTime endDateTime, PeriodUnit unit) {
+	// -----------------------------------------------------------------------
+	@Override
+	public long until(DateTime endDateTime, TemporalUnit unit) {
 
-    if (endDateTime instanceof ChronoZonedDateTime == false) {
-      throw new DateTimeException("Unable to calculate period between objects of two different types");
-    }
-    @SuppressWarnings("unchecked")
-    ChronoZonedDateTime<C> end = (ChronoZonedDateTime<C>) endDateTime;
-    if (getDate().getChrono().equals(end.getDate().getChrono()) == false) {
-      throw new DateTimeException("Unable to calculate period between two different chronologies");
-    }
-    if (unit instanceof ChronoUnit) {
-      end = end.withZoneSameInstant(this.offset);
-      return this.dateTime.periodUntil(end.getDateTime(), unit);
-    }
-    return unit.between(this, endDateTime).getAmount();
-  }
+		if (endDateTime instanceof ChronoZonedDateTime == false) {
+			throw new DateTimeException("Unable to calculate period between objects of two different types");
+		}
+		@SuppressWarnings("unchecked")
+		ChronoZonedDateTime<C> end = (ChronoZonedDateTime<C>) endDateTime;
+		if (getDate().getChrono().equals(end.getDate().getChrono()) == false) {
+			throw new DateTimeException("Unable to calculate period between two different chronologies");
+		}
+		if (unit instanceof ChronoUnit) {
+			end = end.withZoneSameInstant(this.offset);
+			return this.dateTime.until(end.getDateTime(), unit);
+		}
+		return unit.between(this, endDateTime);
+	}
 
 }

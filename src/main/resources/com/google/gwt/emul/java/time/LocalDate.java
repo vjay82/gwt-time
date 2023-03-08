@@ -32,36 +32,37 @@
 package java.time;
 
 import static java.time.LocalTime.SECONDS_PER_DAY;
-import static java.time.calendrical.ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH;
-import static java.time.calendrical.ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR;
-import static java.time.calendrical.ChronoField.ALIGNED_WEEK_OF_MONTH;
-import static java.time.calendrical.ChronoField.ALIGNED_WEEK_OF_YEAR;
-import static java.time.calendrical.ChronoField.DAY_OF_MONTH;
-import static java.time.calendrical.ChronoField.DAY_OF_YEAR;
-import static java.time.calendrical.ChronoField.EPOCH_DAY;
-import static java.time.calendrical.ChronoField.EPOCH_MONTH;
-import static java.time.calendrical.ChronoField.ERA;
-import static java.time.calendrical.ChronoField.MONTH_OF_YEAR;
-import static java.time.calendrical.ChronoField.YEAR;
+import static java.time.temporal.ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH;
+import static java.time.temporal.ChronoField.ALIGNED_DAY_OF_WEEK_IN_YEAR;
+import static java.time.temporal.ChronoField.ALIGNED_WEEK_OF_MONTH;
+import static java.time.temporal.ChronoField.ALIGNED_WEEK_OF_YEAR;
+import static java.time.temporal.ChronoField.DAY_OF_MONTH;
+import static java.time.temporal.ChronoField.DAY_OF_YEAR;
+import static java.time.temporal.ChronoField.EPOCH_DAY;
+import static java.time.temporal.ChronoField.EPOCH_MONTH;
+import static java.time.temporal.ChronoField.ERA;
+import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
+import static java.time.temporal.ChronoField.YEAR;
 
 import java.io.Serializable;
-import java.time.calendrical.ChronoField;
-import java.time.calendrical.ChronoUnit;
-import java.time.calendrical.DateTime;
-import java.time.calendrical.DateTime.WithAdjuster;
-import java.time.calendrical.DateTimeAccessor;
-import java.time.calendrical.DateTimeAdjusters;
-import java.time.calendrical.DateTimeBuilder;
-import java.time.calendrical.DateTimeField;
-import java.time.calendrical.DateTimeValueRange;
-import java.time.calendrical.PeriodUnit;
 import java.time.chrono.ChronoLocalDate;
 import java.time.chrono.Era;
 import java.time.chrono.ISOChrono;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.jdk8.DefaultInterfaceChronoLocalDate;
 import java.time.jdk8.Jdk7Methods;
 import java.time.jdk8.Jdk8Methods;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.DateTime;
+import java.time.temporal.DateTime.WithAdjuster;
+import java.time.temporal.DateTimeAccessor;
+import java.time.temporal.DateTimeAdjusters;
+import java.time.temporal.DateTimeBuilder;
+import java.time.temporal.TemporalField;
+import java.time.temporal.ValueRange;
+import java.time.temporal.TemporalUnit;
 
 /**
  * A date without a time-zone in the ISO-8601 calendar system, such as {@code 2007-12-03}.
@@ -392,6 +393,10 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 		throw new DateTimeParseException("Expected format yyyy-MM-dd", text, index, cause);
 	}
 
+	public static LocalDate parse(String text, DateTimeFormatter formatter) throws DateTimeParseException {
+		return Instant.ofEpochMilli(formatter.parse(text).getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+
 	/**
 	 * @see String#indexOf(int, int)
 	 * 
@@ -487,20 +492,20 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 
 	// -----------------------------------------------------------------------
 	@Override
-	public DateTimeValueRange range(DateTimeField field) {
+	public ValueRange range(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			ChronoField f = (ChronoField) field;
 			if (f.isDateField()) {
 				switch (f) {
 					case DAY_OF_MONTH :
-						return DateTimeValueRange.of(1, lengthOfMonth());
+						return ValueRange.of(1, lengthOfMonth());
 					case DAY_OF_YEAR :
-						return DateTimeValueRange.of(1, lengthOfYear());
+						return ValueRange.of(1, lengthOfYear());
 					case ALIGNED_WEEK_OF_MONTH :
-						return DateTimeValueRange.of(1, getMonth() == Month.FEBRUARY && isLeapYear() == false ? 4 : 5);
+						return ValueRange.of(1, getMonth() == Month.FEBRUARY && isLeapYear() == false ? 4 : 5);
 					case YEAR_OF_ERA :
-						return (getYear() <= 0 ? DateTimeValueRange.of(1, MAX_YEAR + 1) : DateTimeValueRange.of(1, MAX_YEAR));
+						return (getYear() <= 0 ? ValueRange.of(1, MAX_YEAR + 1) : ValueRange.of(1, MAX_YEAR));
 				}
 				return field.range();
 			}
@@ -510,7 +515,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 	}
 
 	@Override
-	public int get(DateTimeField field) {
+	public int get(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			return get0(field);
@@ -519,7 +524,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 	}
 
 	@Override
-	public long getLong(DateTimeField field) {
+	public long getLong(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			if (field == EPOCH_DAY) {
@@ -533,7 +538,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 		return field.doGet(this);
 	}
 
-	private int get0(DateTimeField field) {
+	private int get0(TemporalField field) {
 
 		switch ((ChronoField) field) {
 			case DAY_OF_WEEK :
@@ -811,7 +816,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 	 *             if the value is invalid
 	 */
 	@Override
-	public LocalDate with(DateTimeField field, long newValue) {
+	public LocalDate with(TemporalField field, long newValue) {
 
 		if (field instanceof ChronoField) {
 			ChronoField f = (ChronoField) field;
@@ -941,9 +946,9 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 	 * Returns a copy of this date with the specified period added.
 	 * <p>
 	 * This method returns a new date based on this date with the specified period added. The adjuster is typically
-	 * {@link Period} but may be any other type implementing the {@link java.time.calendrical.DateTime.PlusAdjuster}
+	 * {@link Period} but may be any other type implementing the {@link java.time.temporal.DateTime.PlusAdjuster}
 	 * interface. The calculation is delegated to the specified adjuster, which typically calls back to
-	 * {@link #plus(long, PeriodUnit)}.
+	 * {@link #plus(long, TemporalUnit)}.
 	 * <p>
 	 * This instance is immutable and unaffected by this method call.
 	 * 
@@ -979,7 +984,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 	 *             if the unit cannot be added to this type
 	 */
 	@Override
-	public LocalDate plus(long amountToAdd, PeriodUnit unit) {
+	public LocalDate plus(long amountToAdd, TemporalUnit unit) {
 
 		if (unit instanceof ChronoUnit) {
 			ChronoUnit f = (ChronoUnit) unit;
@@ -1127,9 +1132,9 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 	 * Returns a copy of this date with the specified period subtracted.
 	 * <p>
 	 * This method returns a new date based on this date with the specified period subtracted. The adjuster is typically
-	 * {@link Period} but may be any other type implementing the {@link java.time.calendrical.DateTime.MinusAdjuster}
+	 * {@link Period} but may be any other type implementing the {@link java.time.temporal.DateTime.MinusAdjuster}
 	 * interface. The calculation is delegated to the specified adjuster, which typically calls back to
-	 * {@link #minus(long, PeriodUnit)}.
+	 * {@link #minus(long, TemporalUnit)}.
 	 * <p>
 	 * This instance is immutable and unaffected by this method call.
 	 * 
@@ -1165,7 +1170,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 	 *             if the unit cannot be added to this type
 	 */
 	@Override
-	public LocalDate minus(long amountToSubtract, PeriodUnit unit) {
+	public LocalDate minus(long amountToSubtract, TemporalUnit unit) {
 
 		return (amountToSubtract == Long.MIN_VALUE ? plus(Long.MAX_VALUE, unit).plus(1, unit) : plus(-amountToSubtract, unit));
 	}
@@ -1393,7 +1398,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 
 	// -----------------------------------------------------------------------
 	@Override
-	public long periodUntil(DateTime endDateTime, PeriodUnit unit) {
+	public long until(DateTime endDateTime, TemporalUnit unit) {
 
 		if (endDateTime instanceof LocalDate == false) {
 			throw new DateTimeException("Unable to calculate period between objects of two different types");
@@ -1424,7 +1429,7 @@ public final class LocalDate extends DefaultInterfaceChronoLocalDate<ISOChrono> 
 			}
 			throw new DateTimeException("Unsupported unit: " + unit.getName());
 		}
-		return unit.between(this, endDateTime).getAmount();
+		return unit.between(this, endDateTime);
 	}
 
 	long daysUntil(LocalDate end) {

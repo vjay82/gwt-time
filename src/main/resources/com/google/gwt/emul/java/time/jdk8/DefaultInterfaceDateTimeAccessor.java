@@ -32,10 +32,10 @@
 package java.time.jdk8;
 
 import java.time.DateTimeException;
-import java.time.calendrical.ChronoField;
-import java.time.calendrical.DateTimeAccessor;
-import java.time.calendrical.DateTimeField;
-import java.time.calendrical.DateTimeValueRange;
+import java.time.temporal.ChronoField;
+import java.time.temporal.DateTimeAccessor;
+import java.time.temporal.TemporalField;
+import java.time.temporal.ValueRange;
 
 /**
  * A temporary class providing implementations that will become default interface methods once integrated into
@@ -43,28 +43,28 @@ import java.time.calendrical.DateTimeValueRange;
  */
 public abstract class DefaultInterfaceDateTimeAccessor implements DateTimeAccessor {
 
-  @Override
-  public DateTimeValueRange range(DateTimeField field) {
+	@Override
+	public ValueRange range(TemporalField field) {
 
-    if (field instanceof ChronoField) {
-      if (isSupported(field)) {
-        return field.range();
-      }
-      throw new DateTimeException("Unsupported field: " + field.getName());
-    }
-    return field.doRange(this);
-  }
+		if (field instanceof ChronoField) {
+			if (isSupported(field)) {
+				return field.range();
+			}
+			throw new DateTimeException("Unsupported field: " + field.getName());
+		}
+		return field.doRange(this);
+	}
 
-  @Override
-  public int get(DateTimeField field) {
+	@Override
+	public int get(TemporalField field) {
 
-    return range(field).checkValidIntValue(getLong(field), field);
-  }
+		return range(field).checkValidIntValue(getLong(field), field);
+	}
 
-  @Override
-  public <R> R query(Query<R> query) {
+	@Override
+	public <R> R query(Query<R> query) {
 
-    return query.doQuery(this);
-  }
+		return query.doQuery(this);
+	}
 
 }

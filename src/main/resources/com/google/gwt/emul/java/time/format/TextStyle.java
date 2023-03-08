@@ -39,19 +39,19 @@ package java.time.format;
  * <h4>Implementation notes</h4> This is immutable and thread-safe enum.
  */
 public enum TextStyle {
-  // ordered from large to small
+	// ordered from large to small
 
-  /**
-   * Full text, typically the full description. For example, day-of-week Monday might output "Monday".
-   */
-  FULL,
-  /**
-   * Short text, typically an abbreviation. For example, day-of-week Monday might output "Mon".
-   */
-  SHORT,
-  /**
-   * Narrow text, typically a single letter. For example, day-of-week Monday might output "M".
-   */
-  NARROW;
+	/**
+	 * Full text, typically the full description. For example, day-of-week Monday might output "Monday".
+	 */
+	FULL,
+	/**
+	 * Short text, typically an abbreviation. For example, day-of-week Monday might output "Mon".
+	 */
+	SHORT,
+	/**
+	 * Narrow text, typically a single letter. For example, day-of-week Monday might output "M".
+	 */
+	NARROW;
 
 }

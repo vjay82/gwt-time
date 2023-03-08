@@ -31,23 +31,23 @@
  */
 package java.time;
 
-import static java.time.calendrical.ChronoField.INSTANT_SECONDS;
-import static java.time.calendrical.ChronoField.NANO_OF_SECOND;
+import static java.time.temporal.ChronoField.INSTANT_SECONDS;
+import static java.time.temporal.ChronoField.NANO_OF_SECOND;
 
 import java.io.Serializable;
-import java.time.calendrical.ChronoField;
-import java.time.calendrical.ChronoUnit;
-import java.time.calendrical.DateTime;
-import java.time.calendrical.DateTimeAccessor;
-import java.time.calendrical.DateTimeAdjusters;
-import java.time.calendrical.DateTimeField;
-import java.time.calendrical.DateTimeValueRange;
-import java.time.calendrical.PeriodUnit;
 import java.time.chrono.ChronoZonedDateTime;
 import java.time.chrono.ISOChrono;
 import java.time.format.DateTimeParseException;
 import java.time.jdk8.DefaultInterfaceChronoZonedDateTime;
 import java.time.jdk8.Jdk7Methods;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.DateTime;
+import java.time.temporal.DateTimeAccessor;
+import java.time.temporal.DateTimeAdjusters;
+import java.time.temporal.TemporalField;
+import java.time.temporal.ValueRange;
+import java.time.temporal.TemporalUnit;
 import java.time.zone.ZoneRules;
 import java.util.List;
 
@@ -519,13 +519,13 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 
 	// -----------------------------------------------------------------------
 	@Override
-	public boolean isSupported(DateTimeField field) {
+	public boolean isSupported(TemporalField field) {
 
 		return field instanceof ChronoField || (field != null && field.doIsSupported(this));
 	}
 
 	@Override
-	public DateTimeValueRange range(DateTimeField field) {
+	public ValueRange range(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			return this.dateTime.range(field);
@@ -534,7 +534,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	}
 
 	@Override
-	public int get(DateTimeField field) {
+	public int get(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			switch ((ChronoField) field) {
@@ -549,7 +549,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	}
 
 	@Override
-	public long getLong(DateTimeField field) {
+	public long getLong(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			switch ((ChronoField) field) {
@@ -951,7 +951,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	 *             if the value is invalid
 	 */
 	@Override
-	public ZonedDateTime with(DateTimeField field, long newValue) {
+	public ZonedDateTime with(TemporalField field, long newValue) {
 
 		if (field instanceof ChronoField) {
 			ChronoField f = (ChronoField) field;
@@ -1169,7 +1169,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	 * Not all units are accepted. The {@link ChronoUnit#DAYS days} unit and time units with an exact duration can be
 	 * used, other units throw an exception.
 	 * <p>
-	 * This operates on the local time-line, {@link LocalDateTime#truncatedTo(java.time.calendrical.PeriodUnit)
+	 * This operates on the local time-line, {@link LocalDateTime#truncatedTo(java.time.temporal.TemporalUnit)
 	 * truncating} the underlying local date-time. This is then converted back to a {@code ZoneDateTime}, using the zone
 	 * ID to obtain the offset.
 	 * <p>
@@ -1185,7 +1185,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	 * @throws DateTimeException
 	 *             if unable to truncate
 	 */
-	public ZonedDateTime truncatedTo(PeriodUnit unit) {
+	public ZonedDateTime truncatedTo(TemporalUnit unit) {
 
 		return resolveLocal(this.dateTime.truncatedTo(unit));
 	}
@@ -1195,9 +1195,9 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	 * Returns a copy of this date-time with the specified period added.
 	 * <p>
 	 * This method returns a new date-time based on this time with the specified period added. The adjuster is typically
-	 * {@link Period} but may be any other type implementing the {@link java.time.calendrical.DateTime.PlusAdjuster}
+	 * {@link Period} but may be any other type implementing the {@link java.time.temporal.DateTime.PlusAdjuster}
 	 * interface. The calculation is delegated to the specified adjuster, which typically calls back to
-	 * {@link #plus(long, PeriodUnit)}.
+	 * {@link #plus(long, TemporalUnit)}.
 	 * <p>
 	 * This instance is immutable and unaffected by this method call.
 	 * 
@@ -1243,7 +1243,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	 *             if the unit cannot be added to this type
 	 */
 	@Override
-	public ZonedDateTime plus(long amountToAdd, PeriodUnit unit) {
+	public ZonedDateTime plus(long amountToAdd, TemporalUnit unit) {
 
 		if (unit instanceof ChronoUnit) {
 			ChronoUnit u = (ChronoUnit) unit;
@@ -1447,8 +1447,8 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	 * <p>
 	 * This method returns a new date-time based on this time with the specified period subtracted. The adjuster is
 	 * typically {@link Period} but may be any other type implementing the
-	 * {@link java.time.calendrical.DateTime.MinusAdjuster} interface. The calculation is delegated to the specified
-	 * adjuster, which typically calls back to {@link #minus(long, PeriodUnit)}.
+	 * {@link java.time.temporal.DateTime.MinusAdjuster} interface. The calculation is delegated to the specified
+	 * adjuster, which typically calls back to {@link #minus(long, TemporalUnit)}.
 	 * <p>
 	 * This instance is immutable and unaffected by this method call.
 	 * 
@@ -1494,7 +1494,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 	 *             if the unit cannot be added to this type
 	 */
 	@Override
-	public ZonedDateTime minus(long amountToSubtract, PeriodUnit unit) {
+	public ZonedDateTime minus(long amountToSubtract, TemporalUnit unit) {
 
 		return (amountToSubtract == Long.MIN_VALUE ? plus(Long.MAX_VALUE, unit).plus(1, unit) : plus(-amountToSubtract, unit));
 	}
@@ -1687,7 +1687,7 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 
 	// -----------------------------------------------------------------------
 	@Override
-	public long periodUntil(DateTime endDateTime, PeriodUnit unit) {
+	public long until(DateTime endDateTime, TemporalUnit unit) {
 
 		if (endDateTime instanceof ZonedDateTime == false) {
 			throw new DateTimeException("Unable to calculate period between objects of two different types");
@@ -1695,9 +1695,9 @@ public final class ZonedDateTime extends DefaultInterfaceChronoZonedDateTime<ISO
 		if (unit instanceof ChronoUnit) {
 			ZonedDateTime end = (ZonedDateTime) endDateTime;
 			end = end.withZoneSameInstant(this.offset);
-			return this.dateTime.periodUntil(end.dateTime, unit);
+			return this.dateTime.until(end.dateTime, unit);
 		}
-		return unit.between(this, endDateTime).getAmount();
+		return unit.between(this, endDateTime);
 	}
 
 	// -----------------------------------------------------------------------

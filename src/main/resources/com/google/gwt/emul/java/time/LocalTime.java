@@ -31,30 +31,31 @@
  */
 package java.time;
 
-import static java.time.calendrical.ChronoField.HOUR_OF_DAY;
-import static java.time.calendrical.ChronoField.MICRO_OF_DAY;
-import static java.time.calendrical.ChronoField.MINUTE_OF_HOUR;
-import static java.time.calendrical.ChronoField.NANO_OF_DAY;
-import static java.time.calendrical.ChronoField.NANO_OF_SECOND;
-import static java.time.calendrical.ChronoField.SECOND_OF_DAY;
-import static java.time.calendrical.ChronoField.SECOND_OF_MINUTE;
-import static java.time.calendrical.ChronoUnit.NANOS;
+import static java.time.temporal.ChronoField.HOUR_OF_DAY;
+import static java.time.temporal.ChronoField.MICRO_OF_DAY;
+import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
+import static java.time.temporal.ChronoField.NANO_OF_DAY;
+import static java.time.temporal.ChronoField.NANO_OF_SECOND;
+import static java.time.temporal.ChronoField.SECOND_OF_DAY;
+import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
+import static java.time.temporal.ChronoUnit.NANOS;
 
 import java.io.Serializable;
-import java.time.calendrical.ChronoField;
-import java.time.calendrical.ChronoUnit;
-import java.time.calendrical.DateTime;
-import java.time.calendrical.DateTime.WithAdjuster;
-import java.time.calendrical.DateTimeAccessor;
-import java.time.calendrical.DateTimeBuilder;
-import java.time.calendrical.DateTimeField;
-import java.time.calendrical.DateTimeValueRange;
-import java.time.calendrical.PeriodUnit;
 import java.time.chrono.ChronoLocalDateTime;
 import java.time.chrono.ChronoZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.jdk8.DefaultInterfaceDateTimeAccessor;
 import java.time.jdk8.Jdk7Methods;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.DateTime;
+import java.time.temporal.DateTime.WithAdjuster;
+import java.time.temporal.DateTimeAccessor;
+import java.time.temporal.DateTimeBuilder;
+import java.time.temporal.TemporalField;
+import java.time.temporal.ValueRange;
+import java.time.temporal.TemporalUnit;
 
 /**
  * A time without time-zone in the ISO-8601 calendar system, such as {@code 10:15:30}.
@@ -466,6 +467,10 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 		throw new DateTimeParseException("Expected format HH:mm:ss.SSSSSSSSS", text, errorIndex, cause);
 	}
 
+	public static LocalTime parse(String text, DateTimeFormatter formatter) throws DateTimeParseException {
+		return Instant.ofEpochMilli(formatter.parse(text).getTime()).atZone(ZoneId.systemDefault()).toLocalTime();
+	}
+
 	// -----------------------------------------------------------------------
 	/**
 	 * Creates a local time from the hour, minute, second and nanosecond fields.
@@ -504,7 +509,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 
 	// -----------------------------------------------------------------------
 	@Override
-	public boolean isSupported(DateTimeField field) {
+	public boolean isSupported(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			return ((ChronoField) field).isTimeField();
@@ -513,7 +518,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	}
 
 	@Override
-	public DateTimeValueRange range(DateTimeField field) {
+	public ValueRange range(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			if (((ChronoField) field).isTimeField()) {
@@ -525,7 +530,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	}
 
 	@Override
-	public int get(DateTimeField field) {
+	public int get(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			return get0(field);
@@ -534,7 +539,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	}
 
 	@Override
-	public long getLong(DateTimeField field) {
+	public long getLong(TemporalField field) {
 
 		if (field instanceof ChronoField) {
 			if (field == NANO_OF_DAY) {
@@ -548,7 +553,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 		return field.doGet(this);
 	}
 
-	private int get0(DateTimeField field) {
+	private int get0(TemporalField field) {
 
 		switch ((ChronoField) field) {
 			case NANO_OF_SECOND :
@@ -668,7 +673,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	 * @throws DateTimeException if the value is invalid
 	 */
 	@Override
-	public LocalTime with(DateTimeField field, long newValue) {
+	public LocalTime with(TemporalField field, long newValue) {
 
 		if (field instanceof ChronoField) {
 			ChronoField f = (ChronoField) field;
@@ -800,7 +805,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	 * @return a {@code LocalTime} based on this time with the time truncated, not null
 	 * @throws DateTimeException if unable to truncate
 	 */
-	public LocalTime truncatedTo(PeriodUnit unit) {
+	public LocalTime truncatedTo(TemporalUnit unit) {
 
 		if (unit == ChronoUnit.NANOS) {
 			return this;
@@ -824,8 +829,8 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	 * <p>
 	 * This method returns a new time based on this time with the specified period added. The adjuster is
 	 * typically {@link Period} but may be any other type implementing the
-	 * {@link java.time.calendrical.DateTime.PlusAdjuster} interface. The calculation is delegated to the
-	 * specified adjuster, which typically calls back to {@link #plus(long, PeriodUnit)}.
+	 * {@link java.time.temporal.DateTime.PlusAdjuster} interface. The calculation is delegated to the
+	 * specified adjuster, which typically calls back to {@link #plus(long, TemporalUnit)}.
 	 * <p>
 	 * This instance is immutable and unaffected by this method call.
 	 * 
@@ -856,7 +861,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	 * @throws DateTimeException if the unit cannot be added to this type
 	 */
 	@Override
-	public LocalTime plus(long amountToAdd, PeriodUnit unit) {
+	public LocalTime plus(long amountToAdd, TemporalUnit unit) {
 
 		if (unit instanceof ChronoUnit) {
 			ChronoUnit f = (ChronoUnit) unit;
@@ -991,8 +996,8 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	 * <p>
 	 * This method returns a new time based on this time with the specified period subtracted. The adjuster is
 	 * typically {@link Period} but may be any other type implementing the
-	 * {@link java.time.calendrical.DateTime.MinusAdjuster} interface. The calculation is delegated to the
-	 * specified adjuster, which typically calls back to {@link #minus(long, PeriodUnit)}.
+	 * {@link java.time.temporal.DateTime.MinusAdjuster} interface. The calculation is delegated to the
+	 * specified adjuster, which typically calls back to {@link #minus(long, TemporalUnit)}.
 	 * <p>
 	 * This instance is immutable and unaffected by this method call.
 	 * 
@@ -1023,7 +1028,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	 * @throws DateTimeException if the unit cannot be added to this type
 	 */
 	@Override
-	public LocalTime minus(long amountToSubtract, PeriodUnit unit) {
+	public LocalTime minus(long amountToSubtract, TemporalUnit unit) {
 
 		return (amountToSubtract == Long.MIN_VALUE ? plus(Long.MAX_VALUE, unit).plus(1, unit) : plus(-amountToSubtract, unit));
 	}
@@ -1118,7 +1123,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 	}
 
 	@Override
-	public long periodUntil(DateTime endDateTime, PeriodUnit unit) {
+	public long until(DateTime endDateTime, TemporalUnit unit) {
 
 		if (endDateTime instanceof LocalTime == false) {
 			throw new DateTimeException("Unable to calculate period between objects of two different types");
@@ -1144,7 +1149,7 @@ public final class LocalTime extends DefaultInterfaceDateTimeAccessor implements
 			}
 			throw new DateTimeException("Unsupported unit: " + unit.getName());
 		}
-		return unit.between(this, endDateTime).getAmount();
+		return unit.between(this, endDateTime);
 	}
 
 	@SuppressWarnings("unchecked")

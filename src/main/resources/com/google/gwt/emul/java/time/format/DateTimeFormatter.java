@@ -55,6 +55,6 @@ public class DateTimeFormatter {
 	}
 
 	public Date parse(String text) {
-		return dateTimeFormat.parse(text);
+		return dateTimeFormat.parseStrict(text);
 	}
 }

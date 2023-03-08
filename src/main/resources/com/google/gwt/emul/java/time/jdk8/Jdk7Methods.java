@@ -10,34 +10,34 @@ package java.time.jdk8;
  */
 public final class Jdk7Methods {
 
-  /**
-   * Construction forbidden.
-   */
-  private Jdk7Methods() {
+	/**
+	 * Construction forbidden.
+	 */
+	private Jdk7Methods() {
 
-  }
+	}
 
-  public static <T> T Objects_requireNonNull(T obj, String message) {
+	public static <T> T Objects_requireNonNull(T obj, String message) {
 
-    if (obj == null) {
-      throw new NullPointerException(message);
-    }
-    return obj;
-  }
+		if (obj == null) {
+			throw new NullPointerException(message);
+		}
+		return obj;
+	}
 
-  public static boolean Objects_equals(Object a, Object b) {
+	public static boolean Objects_equals(Object a, Object b) {
 
-    return (a == b) || (a != null && a.equals(b));
-  }
+		return (a == b) || (a != null && a.equals(b));
+	}
 
-  public static int Integer_compare(int x, int y) {
+	public static int Integer_compare(int x, int y) {
 
-    return (x < y) ? -1 : ((x == y) ? 0 : 1);
-  }
+		return (x < y) ? -1 : ((x == y) ? 0 : 1);
+	}
 
-  public static int Long_compare(long x, long y) {
+	public static int Long_compare(long x, long y) {
 
-    return (x < y) ? -1 : ((x == y) ? 0 : 1);
-  }
+		return (x < y) ? -1 : ((x == y) ? 0 : 1);
+	}
 
 }

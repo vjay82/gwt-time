@@ -31,14 +31,14 @@
  */
 package java.time.chrono;
 
-import static java.time.calendrical.ChronoField.ERA;
+import static java.time.temporal.ChronoField.ERA;
 
 import java.time.DateTimeException;
-import java.time.calendrical.ChronoField;
-import java.time.calendrical.DateTime;
-import java.time.calendrical.DateTimeField;
-import java.time.calendrical.DateTimeValueRange;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoField;
+import java.time.temporal.DateTime;
+import java.time.temporal.TemporalField;
+import java.time.temporal.ValueRange;
 import java.util.Locale;
 
 /**
@@ -54,138 +54,138 @@ import java.util.Locale;
  */
 enum ISOEra implements Era<ISOChrono> {
 
-  /**
-   * The singleton instance for the era BCE, 'Before Current Era'. The 'ISO' part of the name emphasizes that
-   * this differs from the BCE era in the Gregorian calendar system. This has the numeric value of {@code 0}.
-   */
-  BCE,
-  /**
-   * The singleton instance for the era CE, 'Current Era'. The 'ISO' part of the name emphasizes that this
-   * differs from the CE era in the Gregorian calendar system. This has the numeric value of {@code 1}.
-   */
-  CE;
+	/**
+	 * The singleton instance for the era BCE, 'Before Current Era'. The 'ISO' part of the name emphasizes that
+	 * this differs from the BCE era in the Gregorian calendar system. This has the numeric value of {@code 0}.
+	 */
+	BCE,
+	/**
+	 * The singleton instance for the era CE, 'Current Era'. The 'ISO' part of the name emphasizes that this
+	 * differs from the CE era in the Gregorian calendar system. This has the numeric value of {@code 1}.
+	 */
+	CE;
 
-  // -----------------------------------------------------------------------
-  /**
-   * Obtains an instance of {@code ISOEra} from an {@code int} value.
-   * <p>
-   * {@code ISOEra} is an enum representing the ISO eras of BCE/CE. This factory allows the enum to be
-   * obtained from the {@code int} value.
-   * 
-   * @param era the BCE/CE value to represent, from 0 (BCE) to 1 (CE)
-   * @return the era singleton, not null
-   * @throws DateTimeException if the value is invalid
-   */
-  public static ISOEra of(int era) {
+	// -----------------------------------------------------------------------
+	/**
+	 * Obtains an instance of {@code ISOEra} from an {@code int} value.
+	 * <p>
+	 * {@code ISOEra} is an enum representing the ISO eras of BCE/CE. This factory allows the enum to be
+	 * obtained from the {@code int} value.
+	 * 
+	 * @param era the BCE/CE value to represent, from 0 (BCE) to 1 (CE)
+	 * @return the era singleton, not null
+	 * @throws DateTimeException if the value is invalid
+	 */
+	public static ISOEra of(int era) {
 
-    switch (era) {
-      case 0:
-        return BCE;
-      case 1:
-        return CE;
-      default :
-        throw new DateTimeException("Invalid era: " + era);
-    }
-  }
+		switch (era) {
+			case 0 :
+				return BCE;
+			case 1 :
+				return CE;
+			default :
+				throw new DateTimeException("Invalid era: " + era);
+		}
+	}
 
-  // -----------------------------------------------------------------------
-  /**
-   * Gets the numeric era {@code int} value.
-   * <p>
-   * The era BCE has the value 0, while the era CE has the value 1.
-   * 
-   * @return the era value, from 0 (BCE) to 1 (CE)
-   */
-  @Override
-  public int getValue() {
+	// -----------------------------------------------------------------------
+	/**
+	 * Gets the numeric era {@code int} value.
+	 * <p>
+	 * The era BCE has the value 0, while the era CE has the value 1.
+	 * 
+	 * @return the era value, from 0 (BCE) to 1 (CE)
+	 */
+	@Override
+	public int getValue() {
 
-    return ordinal();
-  }
+		return ordinal();
+	}
 
-  @Override
-  public ISOChrono getChrono() {
+	@Override
+	public ISOChrono getChrono() {
 
-    return ISOChrono.INSTANCE;
-  }
+		return ISOChrono.INSTANCE;
+	}
 
-  // JDK8 default methods:
-  // -----------------------------------------------------------------------
-  @Override
-  public ChronoLocalDate<ISOChrono> date(int year, int month, int day) {
+	// JDK8 default methods:
+	// -----------------------------------------------------------------------
+	@Override
+	public ChronoLocalDate<ISOChrono> date(int year, int month, int day) {
 
-    return getChrono().date(this, year, month, day);
-  }
+		return getChrono().date(this, year, month, day);
+	}
 
-  @Override
-  public ChronoLocalDate<ISOChrono> dateYearDay(int year, int dayOfYear) {
+	@Override
+	public ChronoLocalDate<ISOChrono> dateYearDay(int year, int dayOfYear) {
 
-    return getChrono().dateYearDay(this, year, dayOfYear);
-  }
+		return getChrono().dateYearDay(this, year, dayOfYear);
+	}
 
-  // -----------------------------------------------------------------------
-  @Override
-  public boolean isSupported(DateTimeField field) {
+	// -----------------------------------------------------------------------
+	@Override
+	public boolean isSupported(TemporalField field) {
 
-    if (field instanceof ChronoField) {
-      return field == ERA;
-    }
-    return field != null && field.doIsSupported(this);
-  }
+		if (field instanceof ChronoField) {
+			return field == ERA;
+		}
+		return field != null && field.doIsSupported(this);
+	}
 
-  @Override
-  public DateTimeValueRange range(DateTimeField field) {
+	@Override
+	public ValueRange range(TemporalField field) {
 
-    if (field == ERA) {
-      return field.range();
-    } else if (field instanceof ChronoField) {
-      throw new DateTimeException("Unsupported field: " + field.getName());
-    }
-    return field.doRange(this);
-  }
+		if (field == ERA) {
+			return field.range();
+		} else if (field instanceof ChronoField) {
+			throw new DateTimeException("Unsupported field: " + field.getName());
+		}
+		return field.doRange(this);
+	}
 
-  @Override
-  public int get(DateTimeField field) {
+	@Override
+	public int get(TemporalField field) {
 
-    if (field == ERA) {
-      return getValue();
-    }
-    return range(field).checkValidIntValue(getLong(field), field);
-  }
+		if (field == ERA) {
+			return getValue();
+		}
+		return range(field).checkValidIntValue(getLong(field), field);
+	}
 
-  @Override
-  public long getLong(DateTimeField field) {
+	@Override
+	public long getLong(TemporalField field) {
 
-    if (field == ERA) {
-      return getValue();
-    } else if (field instanceof ChronoField) {
-      throw new DateTimeException("Unsupported field: " + field.getName());
-    }
-    return field.doGet(this);
-  }
+		if (field == ERA) {
+			return getValue();
+		} else if (field instanceof ChronoField) {
+			throw new DateTimeException("Unsupported field: " + field.getName());
+		}
+		return field.doGet(this);
+	}
 
-  // -------------------------------------------------------------------------
-  @Override
-  public DateTime doWithAdjustment(DateTime dateTime) {
+	// -------------------------------------------------------------------------
+	@Override
+	public DateTime doWithAdjustment(DateTime dateTime) {
 
-    return dateTime.with(ERA, getValue());
-  }
+		return dateTime.with(ERA, getValue());
+	}
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <R> R query(Query<R> query) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public <R> R query(Query<R> query) {
 
-    if (query == Query.CHRONO) {
-      return (R) getChrono();
-    }
-    return query.doQuery(this);
-  }
+		if (query == Query.CHRONO) {
+			return (R) getChrono();
+		}
+		return query.doQuery(this);
+	}
 
-  // -----------------------------------------------------------------------
-  @Override
-  public String getText(TextStyle style, Locale locale) {
+	// -----------------------------------------------------------------------
+	@Override
+	public String getText(TextStyle style, Locale locale) {
 
-    // return new DateTimeFormatterBuilder().appendText(ERA, style).toFormatter(locale).print(this);
-    return toString();
-  }
+		// return new DateTimeFormatterBuilder().appendText(ERA, style).toFormatter(locale).print(this);
+		return toString();
+	}
 
 }

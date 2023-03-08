@@ -31,14 +31,15 @@
  */
 package java.time;
 
-import java.time.calendrical.DateTimeAccessor;
-import java.time.calendrical.DateTimeAccessor.Query;
 import java.time.format.DateTimeParseException;
 import java.time.format.TextStyle;
 import java.time.jdk8.Jdk7Methods;
+import java.time.temporal.DateTimeAccessor;
+import java.time.temporal.DateTimeAccessor.Query;
 import java.time.zone.ZoneRules;
 import java.time.zone.ZoneRulesException;
 import java.time.zone.ZoneRulesProvider;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -118,7 +119,19 @@ public abstract class ZoneId {
 		// But I figure it working on some browsers is better than always returning UTC which was
 		// the previous implementation
 		String z = getJavascriptDefaultTimeZoneId();
-		systemDefault = z == null ? ZoneOffset.UTC : ZoneId.of(z);
+		systemDefault = z == null ? ZoneOffset.UTC : new ZoneId() {
+
+			@Override
+			public String getId() {
+				return z;
+			}
+
+			@Override
+			public ZoneRules getRules() {
+				return ZoneOffset.ofTotalSeconds(60 * new Date(0).getTimezoneOffset() * -1).getRules();
+			}
+
+		};
 	}
 
 	public static ZoneId systemDefault() {
