@@ -31,6 +31,7 @@
  */
 package java.time;
 
+import java.time.ZoneOffset.ZoneOffsetRules;
 import java.time.format.DateTimeParseException;
 import java.time.format.TextStyle;
 import java.time.jdk8.Jdk7Methods;
@@ -39,7 +40,9 @@ import java.time.temporal.DateTimeAccessor.Query;
 import java.time.zone.ZoneRules;
 import java.time.zone.ZoneRulesException;
 import java.time.zone.ZoneRulesProvider;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -97,8 +100,8 @@ import java.util.TimeZone;
 public abstract class ZoneId {
 
 	protected native static String getJavascriptDefaultTimeZoneId() /*-{
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  }-*/;
+		return Intl.DateTimeFormat().resolvedOptions().timeZone;
+	}-*/;
 
 	// -----------------------------------------------------------------------
 	/**
@@ -119,7 +122,7 @@ public abstract class ZoneId {
 		// But I figure it working on some browsers is better than always returning UTC which was
 		// the previous implementation
 		String z = getJavascriptDefaultTimeZoneId();
-		systemDefault = z == null ? ZoneOffset.UTC : new ZoneId() {
+		systemDefault = z == null || z.isEmpty() ? ZoneOffset.UTC : new ZoneId() {
 
 			@Override
 			public String getId() {
@@ -128,11 +131,34 @@ public abstract class ZoneId {
 
 			@Override
 			public ZoneRules getRules() {
-				return ZoneOffset.ofTotalSeconds(60 * new Date(0).getTimezoneOffset() * -1).getRules();
+				return new ZoneOffsetRules(ZoneOffset.ofTotalSeconds(60 * new Date().getTimezoneOffset() * -1)) {
+					@Override
+					public List<ZoneOffset> getValidOffsets(LocalDateTime localDateTime) {
+						return Arrays.asList(ZoneOffset.ofTotalSeconds(60 * new Date(localDateTime.toEpochSecond(zoneOffset) * 1000).getTimezoneOffset() * -1));
+					}
+				};
 			}
 
 		};
 	}
+
+	//	public static class DynamicZoneOffset extends ZoneOffset {
+	//
+	//		public DynamicZoneOffset() {
+	//			super(60 * new Date().getTimezoneOffset() * -1);
+	//		}
+	//
+	//		@Override
+	//		public ZoneRules getRules() {
+	//			return new ZoneOffsetRules(this) {
+	//				@Override
+	//				public List<ZoneOffset> getValidOffsets(LocalDateTime localDateTime) {
+	//					return Arrays.asList(ZoneOffset.ofTotalSeconds(60 * new Date(localDateTime.toEpochSecond(DynamicZoneOffset.this) * 1000).getTimezoneOffset() * -1));
+	//				}
+	//			};
+	//		}
+	//
+	//	}
 
 	public static ZoneId systemDefault() {
 		return systemDefault;

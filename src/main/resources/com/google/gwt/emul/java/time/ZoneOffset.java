@@ -74,7 +74,7 @@ import java.util.Map;
  * 
  * <h4>Implementation notes</h4> This class is immutable and thread-safe.
  */
-public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAdjuster, Comparable<ZoneOffset>, Serializable {
+public class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAdjuster, Comparable<ZoneOffset>, Serializable {
 
 	/** Cache of time-zone offset by offset in seconds. */
 	private static final Map<Integer, ZoneOffset> SECONDS_CACHE = new HashMap<Integer, ZoneOffset>();
@@ -396,7 +396,7 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 	 * 
 	 * @param totalSeconds the total time-zone offset in seconds, from -64800 to +64800
 	 */
-	private ZoneOffset(int totalSeconds) {
+	protected ZoneOffset(int totalSeconds) {
 
 		super();
 		this.totalSeconds = totalSeconds;
@@ -530,7 +530,7 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 	@Override
 	public ZoneRules getRules() {
 
-		return new ZoneOffsetRules();
+		return new ZoneOffsetRules(this);
 	}
 
 	// -----------------------------------------------------------------------
@@ -596,7 +596,14 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 		return this.id;
 	}
 
-	private class ZoneOffsetRules implements ZoneRules {
+	public static class ZoneOffsetRules implements ZoneRules {
+
+		protected ZoneOffset zoneOffset;
+
+		public ZoneOffsetRules(ZoneOffset zoneOffset) {
+			super();
+			this.zoneOffset = zoneOffset;
+		}
 
 		/**
 		 * {@inheritDoc}
@@ -613,7 +620,7 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 		@Override
 		public ZoneOffset getOffset(Instant instant) {
 
-			return ZoneOffset.this;
+			return zoneOffset;
 		}
 
 		/**
@@ -622,7 +629,7 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 		@Override
 		public ZoneOffset getOffset(LocalDateTime localDateTime) {
 
-			return ZoneOffset.this;
+			return zoneOffset;
 		}
 
 		/**
@@ -630,8 +637,7 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 		 */
 		@Override
 		public List<ZoneOffset> getValidOffsets(LocalDateTime localDateTime) {
-
-			return Arrays.asList(ZoneOffset.this);
+			return Arrays.asList(zoneOffset);
 		}
 
 		/**
@@ -639,8 +645,7 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 		 */
 		@Override
 		public ZoneOffset getStandardOffset(Instant instant) {
-
-			return ZoneOffset.this;
+			return zoneOffset;
 		}
 
 		/**
@@ -648,7 +653,6 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 		 */
 		@Override
 		public Duration getDaylightSavings(Instant instant) {
-
 			return Duration.ZERO;
 		}
 
@@ -657,7 +661,6 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 		 */
 		@Override
 		public boolean isDaylightSavings(Instant instant) {
-
 			return false;
 		}
 
@@ -666,8 +669,7 @@ public final class ZoneOffset extends ZoneId implements DateTimeAccessor, WithAd
 		 */
 		@Override
 		public boolean isValidOffset(LocalDateTime localDateTime, ZoneOffset offset) {
-
-			return (ZoneOffset.this.equals(offset));
+			return (zoneOffset.equals(offset));
 		}
 
 	}
